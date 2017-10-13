@@ -1,16 +1,24 @@
-sftp_s3s:
-  image: chessracer/sftp-s3fs:latest
-  ports:
-   - "21:22"
-  environment:
-    AWSACCESSKEYID: ${AWSACCESSKEYID}
-    AWSSECRETACCESSKEY: ${AWSSECRETACCESSKEY}
-    S3_BUCKET_NAME: ${S3_BUCKET_NAME}
-  cap_add:
-   - MKNOD
-   - SYS_ADMIN
-  security_opt:
-   - apparmor:unconfined
-  devices:
-   - /dev/fuse
-  command: ${USERNAME}:${PASSWORD}:::sync_to_s3
+version: '2'
+
+services:
+    sftp-s3fs:
+        image: sftp-s3fs
+        environment:
+          AWSACCESSKEYID: ${AWSACCESSKEYID}
+          AWSSECRETACCESSKEY: ${AWSSECRETACCESSKEY}
+          S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+          AWS_REGION: ${AWS_REGION}
+          SSH_HOST_KEYS_DIR: /root/host_keys
+        ports:
+          - "9522:22"
+        volumes:
+          - ./authorized_keys:/home/sorimachi/.ssh/authorized_keys
+          - ./host_keys:/root/host_keys
+        restart: always
+        devices:
+          - "/dev/fuse:/dev/fuse"
+        cap_add:
+          - MKNOD
+          - SYS_ADMIN
+        security_opt:
+         - apparmor:unconfined
